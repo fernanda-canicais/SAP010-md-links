@@ -1,17 +1,19 @@
 const fs = require("fs");
 const path = require("path");
+const fetch = require("cross-fetch");
 
-function lerArquivos(path) {
+function lerArquivos(filePath) {
   return new Promise((resolve, reject) => {
-    fs.readFile(path, "utf8", (err, data) => {
+    fs.readFile(filePath, "utf8", (err, data) => {
       if (err) {
         console.error(err);
         return reject(`Erro na leitura do arquivo: ${err}`);
       }
-      const linkRegex = /\[([^[\]]*)\]\((https?:\/\/[^\s?#.].[^\s]*)\)/gm;
 
-      let match;
+      const linkRegex = /\[([^[\]]*)\]\((https?:\/\/[^\s?#.].[^\s]*)\)/gm;
       const darMatch = [];
+      let match;
+
       while ((match = linkRegex.exec(data)) !== null) {
         darMatch.push(match);
       }
@@ -19,50 +21,88 @@ function lerArquivos(path) {
       const linksEncontrados = darMatch.map((match) => ({
         text: match[1],
         url: match[2],
-        file: path,
+        file: filePath,
       }));
 
-      console.log(linksEncontrados);
       resolve(linksEncontrados);
     });
   });
 }
 
-// Apagar depois que tiver CLI pronta
-const caminhoDoArquivo = path.join(__dirname, "arquivos", "arquivo.md");
-lerArquivos(caminhoDoArquivo);
-
 function lerDiretorioMd(diretorio) {
   return new Promise((resolve, reject) => {
-    fs.readdir(diretorio, (err, data) => {
+    fs.readdir(diretorio, (err, files) => {
       if (err) {
         console.error(err);
         return reject(`Erro ao ler o diretório: ${err}`);
       }
 
-      const listaArquivosMd = data
-        .filter((data) => data.endsWith(".md"))
-        .map((data) => path.join(diretorio, data));
+      const listaPromessas = files
+        .filter((file) => file.endsWith(".md"))
+        .map((file) => lerArquivos(path.join(diretorio, file)));
 
-      console.log(listaArquivosMd);
-      resolve(listaArquivosMd);
+      Promise.all(listaPromessas)
+        .then((array) => {
+
+          const linksEncontrados = array.flat();
+          resolve(linksEncontrados);
+        })
+        .catch((err) => {
+          reject(err);
+        });
     });
   });
 }
 
-const caminhoDoDiretorio = path.join(__dirname, "arquivos");
-lerDiretorioMd(caminhoDoDiretorio);
+function validarLinks(arrayLinks) {
+  return Promise.all(
+    arrayLinks.map((link) => {
+      return fetch(link.url)
+        .then((response) => {
+         
+          return {
+            ...link,
+            status: response.status,
+            ok: response.ok ? 'ok': 'fail'
+          };
+        })
+        .catch(() => {
+          link.status = 404;
+          link.ok = "FAIL";
+          return {
+            ...link,
+          status: 404,
+        ok: 'fail'};
+        });
+    })
+  );
+}
 
-function mdLinks(path) {
+function mdLinks(path, option) {
   return new Promise((resolve, reject) => {
     fs.stat(path, (err, stats) => {
       if (err) {
         return reject(`Erro: ${err}`);
       } else if (stats.isFile()) {
-        //console.log(lerArquivos);
-        resolve(lerArquivos(path));
+        lerArquivos(path)
+          .then((links) => {
+            if (option && option.validate) {
+              return validarLinks(links);
+            }
+            return links;
+          })
+          .then(resolve)
+          .catch(reject);
       } else if (stats.isDirectory()) {
-        resolve(lerDiretorioMd(diretorio));
+        lerDiretorioMd(path)
+          .then((links) => {
+            if (option && option.validate) {
+              return validarLinks(links);
+            }
+            return links;
+          })
+          .then(resolve)
+          .catch(reject);
       }
     });
   });
