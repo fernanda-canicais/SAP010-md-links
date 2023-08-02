@@ -108,4 +108,4 @@ function mdLinks(path, option) {
   });
 }
 
-module.exports = { mdLinks };
+module.exports = { mdLinks, lerArquivos, validarLinks };
