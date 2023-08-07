@@ -6,8 +6,7 @@ function lerArquivos(filePath) {
   return new Promise((resolve, reject) => {
     fs.readFile(filePath, "utf8", (err, data) => {
       if (err) {
-        console.error(err);
-        return reject(`Erro na leitura do arquivo: ${err}`);
+        return reject(err);
       }
 
       const linkRegex = /\[([^[\]]*)\]\((https?:\/\/[^\s?#.].[^\s]*)\)/gm;
@@ -33,7 +32,6 @@ function lerDiretorioMd(diretorio) {
   return new Promise((resolve, reject) => {
     fs.readdir(diretorio, (err, files) => {
       if (err) {
-        console.error(err);
         return reject(`Erro ao ler o diretório: ${err}`);
       }
 
@@ -59,16 +57,13 @@ function validarLinks(arrayLinks) {
     arrayLinks.map((link) => {
       return fetch(link.url)
         .then((response) => {
-         
           return {
             ...link,
             status: response.status,
             ok: response.ok ? 'ok': 'fail'
           };
         })
-        .catch(() => {
-          link.status = 404;
-          link.ok = "FAIL";
+        .catch((error) => {
           return {
             ...link,
           status: 404,
@@ -108,4 +103,4 @@ function mdLinks(path, option) {
   });
 }
 
-module.exports = { mdLinks, lerArquivos, validarLinks };
+module.exports = { mdLinks, lerArquivos, lerDiretorioMd, validarLinks };
