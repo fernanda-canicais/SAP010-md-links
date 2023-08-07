@@ -45,7 +45,7 @@ function lerDiretorioMd(diretorio) {
           const linksEncontrados = array.flat();
           resolve(linksEncontrados);
         })
-        .catch((err) => {
+        .catch((reject) => {
           reject(err);
         });
     });
@@ -94,7 +94,6 @@ function mdLinks(path, option) {
             if (option && option.validate) {
               return validarLinks(links);
             }
-            return links;
           })
           .then(resolve)
           .catch(reject);

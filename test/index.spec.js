@@ -34,7 +34,7 @@ describe("lerArquivos", () => {
   });
 });
 
-describe('validarLinks', () => {
+describe("validarLinks", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -99,7 +99,7 @@ describe("lerDiretorioMd", () => {
       const result = await lerDiretorioMd(directoryPath);
       expect(result).toEqual(expectedLinks);
     } catch (error) {
-      fail(error); // Em caso de erro, falha o teste e mostra o erro
+      fail(error);
     }
   });
 
