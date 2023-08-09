@@ -1,6 +1,6 @@
 {
-  "name": "md-links",
-  "version": "0.1.0",
+  "name": "fernandacanicais-mdlinks",
+  "version": "1.0.0",
   "engines": {
     "node": ">=16.x"
   },
@@ -21,7 +21,7 @@
     "test": "jest --coverage"
   },
   "keywords": [],
-  "author": "",
+  "author": "Fernanda Caniçais",
   "license": "ISC",
   "dependencies": {
     "cross-fetch": "^4.0.0",

@@ -19,7 +19,7 @@ Uma comunidade open source nos propôs criar uma ferramenta, usando Node.js, que
 
 ## 2. Guia de Instalação 📈
 Para instalar esta biblioteca você deve executar a seguinte linha de comando:
-<br> `npm install md-links XXXXXX`. 
+<br> `npm i fernandacanicais-mdlinks`. 
 <br>
 <br> Observação:
 <br> É necessário ter a instalação do Node.
